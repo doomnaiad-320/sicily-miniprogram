@@ -1,0 +1,63 @@
+<t-navbar title="详情" left-arrow />
+
+<view class="detail-container" wx:if="{{post}}">
+  <!-- 图片轮播 -->
+  <swiper class="image-swiper" indicator-dots autoplay circular>
+    <swiper-item wx:for="{{post.images}}" wx:key="id">
+      <image
+        src="{{item.url}}"
+        mode="aspectFill"
+        data-url="{{item.url}}"
+        bindtap="previewImage"
+      />
+    </swiper-item>
+  </swiper>
+
+  <!-- 基本信息 -->
+  <view class="info-card">
+    <view class="type-badge {{post.type === 'LOST' ? 'lost' : 'found'}}">
+      {{post.type === 'LOST' ? '失物' : '招领'}}
+    </view>
+    <view class="desc">{{post.description}}</view>
+    <view class="meta">
+      <text class="category">{{post.category.name}}</text>
+      <text class="location" wx:if="{{post.locationText}}">📍{{post.locationText}}</text>
+    </view>
+    <view class="tags" wx:if="{{post.tags && post.tags.length}}">
+      <text wx:for="{{post.tags}}" wx:key="*this" class="tag">{{item}}</text>
+    </view>
+    <view class="contact" wx:if="{{post.contactPhone}}">
+      <text>联系电话：{{post.contactPhone}}</text>
+      <t-button size="extra-small" theme="primary" bindtap="makeCall">拨打</t-button>
+    </view>
+  </view>
+
+  <!-- 留言区 -->
+  <view class="comment-section">
+    <view class="section-title">留言 ({{comments.length}})</view>
+
+    <view class="comment-input">
+      <input
+        placeholder="写下你的留言..."
+        value="{{commentInput}}"
+        bindinput="onCommentInput"
+      />
+      <t-button size="small" theme="primary" bindtap="submitComment">发送</t-button>
+    </view>
+
+    <view class="comment-list">
+      <view wx:if="{{comments.length === 0}}" class="empty-comment">暂无留言</view>
+      <view wx:for="{{comments}}" wx:key="id" class="comment-item">
+        <t-avatar image="{{item.user.avatarUrl}}" size="small" />
+        <view class="comment-content">
+          <view class="comment-user">{{item.user.nickname}}</view>
+          <view class="comment-text">{{item.content}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+</view>
+
+<view wx:if="{{loading}}" class="loading-container">
+  <t-loading theme="circular" size="80rpx" />
+</view>

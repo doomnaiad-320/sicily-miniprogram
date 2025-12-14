@@ -1,0 +1,56 @@
+<view class="home-container">
+  <t-tabs defaultValue="all" bind:change="onTabChange">
+    <t-tab-panel label="全部" value="all" />
+    <t-tab-panel label="失物" value="LOST" />
+    <t-tab-panel label="招领" value="FOUND" />
+  </t-tabs>
+
+  <t-pull-down-refresh
+    value="{{enable}}"
+    bind:refresh="onRefresh"
+    loadingTexts="{{['下拉刷新', '松手刷新', '正在刷新', '刷新完成']}}"
+  >
+    <view class="post-list">
+      <view wx:if="{{posts.length === 0 && !loading}}" class="empty-tip">
+        <t-empty description="暂无数据" />
+      </view>
+
+      <view
+        wx:for="{{posts}}"
+        wx:key="id"
+        class="post-card"
+        data-id="{{item.id}}"
+        bindtap="goDetail"
+      >
+        <view class="post-image">
+          <image src="{{item.images[0].url}}" mode="aspectFill" />
+          <view class="post-type {{item.type === 'LOST' ? 'lost' : 'found'}}">
+            {{item.type === 'LOST' ? '失物' : '招领'}}
+          </view>
+        </view>
+        <view class="post-info">
+          <view class="post-desc">{{item.description}}</view>
+          <view class="post-meta">
+            <text class="post-category">{{item.category.name}}</text>
+            <text class="post-location" wx:if="{{item.locationText}}">📍{{item.locationText}}</text>
+          </view>
+          <view class="post-tags" wx:if="{{item.tags && item.tags.length}}">
+            <text wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag" class="tag">{{tag}}</text>
+          </view>
+        </view>
+      </view>
+
+      <view wx:if="{{loading}}" class="loading-tip">
+        <t-loading theme="circular" size="40rpx" />
+        <text>加载中...</text>
+      </view>
+    </view>
+  </t-pull-down-refresh>
+</view>
+
+<view class="home-release">
+  <t-button theme="primary" size="large" icon="add" shape="round" bindtap="goRelease">
+    发布
+  </t-button>
+</view>
+<t-message id="t-message" />

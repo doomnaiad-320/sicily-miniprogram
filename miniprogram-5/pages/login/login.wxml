@@ -1,0 +1,25 @@
+<t-navbar title="登录" left-arrow bind:go-back="goBack" />
+<view class="login-page">
+  <view class="login-header">
+    <image class="logo" src="/static/logo.png" mode="aspectFit" />
+    <view class="title">校园失物招领</view>
+    <view class="subtitle">找回丢失的物品，帮助他人</view>
+  </view>
+
+  <view class="login-content">
+    <t-button
+      theme="primary"
+      size="large"
+      block
+      icon="logo-wechat-stroke"
+      loading="{{loading}}"
+      bindtap="wechatLogin"
+    >
+      微信一键登录
+    </t-button>
+
+    <view class="tips">
+      登录即表示同意《用户协议》和《隐私政策》
+    </view>
+  </view>
+</view>

@@ -1,0 +1,106 @@
+<t-navbar title="发布信息" left-arrow />
+<view class="page">
+  <view class="release-container">
+    <!-- 类型选择 -->
+    <view class="type-select box">
+      <t-radio-group value="{{type}}" bind:change="onTypeChange">
+        <t-radio value="LOST" label="我丢了东西" />
+        <t-radio value="FOUND" label="我捡到东西" />
+      </t-radio-group>
+    </view>
+
+    <!-- 图片上传 -->
+    <view class="upload box">
+      <view class="section-title">上传图片 (2-9张)</view>
+      <t-upload
+        media-type="{{['image']}}"
+        files="{{originFiles}}"
+        gridConfig="{{gridConfig}}"
+        bind:success="handleUploadSuccess"
+        bind:remove="handleRemove"
+        max="9"
+      />
+    </view>
+
+    <!-- 分类选择 -->
+    <view class="category box">
+      <view class="section-title">选择分类</view>
+      <t-radio-group value="{{categoryId}}" bind:change="onCategoryChange">
+        <t-radio
+          wx:for="{{categories}}"
+          wx:key="id"
+          value="{{item.id}}"
+          label="{{item.name}}"
+        />
+      </t-radio-group>
+    </view>
+
+    <!-- 描述 -->
+    <view class="desc box">
+      <view class="section-title">详细描述</view>
+      <t-textarea
+        placeholder="请描述物品特征、丢失/捡到的情况等 (至少10字)"
+        maxlength="500"
+        value="{{description}}"
+        bind:change="onDescChange"
+        indicator
+      />
+    </view>
+
+    <!-- 位置 -->
+    <view class="location box">
+      <view class="section-title">位置信息</view>
+      <view class="location-row">
+        <t-button size="small" theme="light" icon="location" bindtap="getLocation">
+          {{locationLat ? '已定位' : '获取定位'}}
+        </t-button>
+      </view>
+      <t-input
+        placeholder="请描述具体位置 (如: 图书馆3楼)"
+        value="{{locationText}}"
+        bind:change="onLocationTextChange"
+      />
+    </view>
+
+    <!-- 联系方式 -->
+    <view class="phone box">
+      <view class="section-title">联系电话 (选填)</view>
+      <t-input
+        type="number"
+        placeholder="方便失主/拾主联系您"
+        maxlength="11"
+        value="{{contactPhone}}"
+        bind:change="onPhoneChange"
+      />
+    </view>
+
+    <!-- 标签 -->
+    <view class="tags box" wx:if="{{suggestedTags.length}}">
+      <view class="section-title">推荐标签</view>
+      <view class="tag-list">
+        <view
+          wx:for="{{suggestedTags}}"
+          wx:key="*this"
+          class="tag-item {{tags.includes(item) ? 'active' : ''}}"
+          data-tag="{{item}}"
+          bindtap="toggleTag"
+        >
+          {{item}}
+        </view>
+      </view>
+    </view>
+
+    <!-- 提交按钮 -->
+    <view class="btngroup box">
+      <t-button
+        theme="primary"
+        icon="check"
+        content="提交发布"
+        size="large"
+        block
+        loading="{{submitting}}"
+        bindtap="submit"
+      />
+    </view>
+  </view>
+</view>
