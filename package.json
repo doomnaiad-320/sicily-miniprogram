@@ -1,0 +1,9 @@
+{
+  "name": "campus-lost-found",
+  "private": true,
+  "workspaces": [
+    "server/api",
+    "server/admin",
+    "miniapp"
+  ]
+}

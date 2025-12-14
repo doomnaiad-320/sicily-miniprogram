@@ -1,0 +1,139 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  // 开发默认使用 SQLite；生产切换 MySQL 5.6 时需修改 provider 与连接串
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum PostType {
+  LOST
+  FOUND
+}
+
+enum PostStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  OFFLINE
+}
+
+enum AuditAction {
+  APPROVED
+  REJECTED
+  OFFLINE
+}
+
+model User {
+  id          Int        @id @default(autoincrement())
+  openId      String     @unique
+  nickname    String
+  avatarUrl   String
+  status      UserStatus @default(ACTIVE)
+  createdAt   DateTime   @default(now())
+  lastLoginAt DateTime?
+
+  posts    Post[]
+  comments Comment[]
+}
+
+model Admin {
+  id          Int      @id @default(autoincrement())
+  username    String   @unique
+  password    String
+  createdAt   DateTime @default(now())
+  lastLoginAt DateTime?
+
+  audits AuditRecord[]
+  posts  Post[]
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  sort      Int      @default(0)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts Post[]
+
+  @@unique([name])
+}
+
+model Post {
+  id            Int         @id @default(autoincrement())
+  type          PostType
+  title         String?
+  description   String      @db.Text
+  categoryId    Int
+  locationLat   Float?
+  locationLng   Float?
+  locationText  String?
+  contactPhone  String?
+  status        PostStatus  @default(PENDING)
+  rejectReason  String?
+  tagsJson      String?     @db.Text
+  createdByUser Int?
+  createdByAdmin Int?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  category      Category    @relation(fields: [categoryId], references: [id])
+  user          User?       @relation(fields: [createdByUser], references: [id])
+  admin         Admin?      @relation(fields: [createdByAdmin], references: [id])
+  images        PostImage[]
+  comments      Comment[]
+  audits        AuditRecord[]
+
+  @@index([categoryId])
+  @@index([status, type])
+  @@index([createdByUser])
+}
+
+model PostImage {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  url       String
+  sort      Int      @default(0)
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id])
+
+  @@index([postId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    Int
+  content   String   @db.Text
+  createdAt DateTime @default(now())
+  isDeleted Boolean  @default(false)
+
+  post Post @relation(fields: [postId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([postId])
+}
+
+model AuditRecord {
+  id        Int         @id @default(autoincrement())
+  postId    Int
+  adminId   Int
+  action    AuditAction
+  reason    String?
+  createdAt DateTime    @default(now())
+
+  post  Post  @relation(fields: [postId], references: [id])
+  admin Admin @relation(fields: [adminId], references: [id])
+
+  @@index([postId])
+}
