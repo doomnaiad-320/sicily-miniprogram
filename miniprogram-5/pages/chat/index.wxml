@@ -61,6 +61,14 @@
           <text class="info-label">联系电话</text>
           <text class="info-value">{{maskedPhone}}</text>
         </view>
+        <t-button 
+          theme="primary"
+          size="small" 
+          bindtap="makeCall"
+          icon="call"
+        >
+          联系
+        </t-button>
       </view>
     </view>
 
@@ -136,15 +144,6 @@
       bindtap="submitComment"
     >
       发送
-    </t-button>
-    <t-button 
-      theme="light"
-      size="small" 
-      wx:if="{{post.contactPhone}}"
-      bindtap="makeCall"
-      icon="call"
-    >
-      联系
     </t-button>
   </view>
 </view>

@@ -1,4 +1,5 @@
 import request from '~/api/request';
+import { getImageUrl } from '~/utils/url';
 
 Page({
   data: {
@@ -42,7 +43,15 @@ Page({
         .map((k) => `${k}=${params[k]}`)
         .join('&');
       const res = await request(`/me/posts?${query}`);
-      this.setData({ myPosts: res.data.items || [], loading: false });
+      const posts = (res.data.posts || res.data.items || []).map(post => ({
+        ...post,
+        images: (post.images || []).map(img => ({
+          ...img,
+          url: getImageUrl(img.url)
+        })),
+        createdAtText: this.formatTime(post.createdAt)
+      }));
+      this.setData({ myPosts: posts, loading: false });
     } catch (e) {
       console.error('加载我的发布失败', e);
       this.setData({ loading: false });
@@ -85,5 +94,24 @@ Page({
       OFFLINE: 'offline',
     };
     return map[status] || '';
+  },
+
+  formatTime(dateStr) {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diff = now - date;
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+    
+    if (minutes < 1) return '刚刚';
+    if (minutes < 60) return `${minutes}分钟前`;
+    if (hours < 24) return `${hours}小时前`;
+    if (days < 7) return `${days}天前`;
+    
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${month}月${day}日`;
   },
 });

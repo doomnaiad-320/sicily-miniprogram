@@ -1,5 +1,6 @@
 import Message from 'tdesign-miniprogram/message/index';
 import request from '~/api/request';
+import { getImageUrl } from '~/utils/url';
 
 Page({
   data: {
@@ -68,12 +69,23 @@ Page({
     }
   },
 
+  processItem(item) {
+    item.createdAtText = this.formatTime(item.createdAt);
+    if (item.images && item.images.length > 0) {
+      item.images = item.images.map(img => ({
+        ...img,
+        url: getImageUrl(img.url)
+      }));
+    }
+    return item;
+  },
+
   distributeToWaterfall(items) {
     const leftColumn = [];
     const rightColumn = [];
     
     items.forEach((item, index) => {
-      item.createdAtText = this.formatTime(item.createdAt);
+      this.processItem(item);
       if (index % 2 === 0) {
         leftColumn.push(item);
       } else {
@@ -91,7 +103,7 @@ Page({
     const startIndex = posts.length;
     
     items.forEach((item, index) => {
-      item.createdAtText = this.formatTime(item.createdAt);
+      this.processItem(item);
       if ((startIndex + index) % 2 === 0) {
         newLeft.push(item);
       } else {

@@ -1,5 +1,6 @@
 import request from '~/api/request';
 import config from '~/config';
+import { getImageUrl } from '~/utils/url';
 
 Page({
   data: {
@@ -26,9 +27,17 @@ Page({
       const post = res.data;
       post.createdAtText = this.formatTime(post.createdAt);
       
+      if (post.images && post.images.length > 0) {
+        post.images = post.images.map(img => ({
+          ...img,
+          url: getImageUrl(img.url)
+        }));
+      }
+      
       const comments = (post.comments || []).map(c => ({
         ...c,
-        createdAtText: this.formatTime(c.createdAt)
+        createdAtText: this.formatTime(c.createdAt),
+        imageUrl: getImageUrl(c.imageUrl)
       }));
       
       const maskedPhone = this.maskPhone(post.contactPhone);

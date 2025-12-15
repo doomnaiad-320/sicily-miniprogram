@@ -16,9 +16,12 @@
 
   <!-- 我的发布 -->
   <view class="my-posts" wx:if="{{isLoggedIn}}">
-    <view class="section-title">我的发布</view>
+    <view class="section-header">
+      <text class="section-title">我的发布</text>
+      <text class="section-count">共 {{myPosts.length}} 条</text>
+    </view>
 
-    <t-tabs defaultValue="all" bind:change="onTabChange">
+    <t-tabs defaultValue="all" bind:change="onTabChange" class="post-tabs">
       <t-tab-panel label="全部" value="all" />
       <t-tab-panel label="审核中" value="PENDING" />
       <t-tab-panel label="已通过" value="APPROVED" />
@@ -27,35 +30,75 @@
 
     <view class="post-list">
       <view wx:if="{{myPosts.length === 0 && !loading}}" class="empty-tip">
-        <t-empty description="暂无发布" />
+        <t-empty description="暂无发布记录" />
       </view>
 
       <view
         wx:for="{{myPosts}}"
         wx:key="id"
-        class="post-item"
+        class="post-card"
         data-id="{{item.id}}"
         bindtap="goDetail"
       >
-        <image src="{{item.images[0].url}}" mode="aspectFill" class="post-thumb" />
-        <view class="post-content">
-          <view class="post-desc">{{item.description}}</view>
-          <view class="post-footer">
-            <text class="post-type {{item.type === 'LOST' ? 'lost' : 'found'}}">
-              {{item.type === 'LOST' ? '失物' : '招领'}}
-            </text>
-            <text class="post-status status-{{item.status}}">
-              {{item.status === 'PENDING' ? '审核中' : item.status === 'APPROVED' ? '已通过' : item.status === 'REJECTED' ? '已拒绝' : '已下架'}}
-            </text>
+        <view class="card-header">
+          <view class="type-badge {{item.type === 'LOST' ? 'lost' : 'found'}}">
+            {{item.type === 'LOST' ? '寻物启事' : '失物招领'}}
           </view>
-          <view wx:if="{{item.status === 'REJECTED' && item.rejectReason}}" class="reject-reason">
-            拒绝原因：{{item.rejectReason}}
+          <view class="status-badge status-{{item.status}}">
+            {{item.status === 'PENDING' ? '审核中' : item.status === 'APPROVED' ? '已通过' : item.status === 'REJECTED' ? '已拒绝' : '已下架'}}
           </view>
+        </view>
+
+        <view class="card-body">
+          <view class="card-main">
+            <view class="card-desc">{{item.description}}</view>
+            <view class="card-info">
+              <view class="info-row" wx:if="{{item.category}}">
+                <t-icon name="view-module" size="28rpx" color="#999" />
+                <text>{{item.category.name}}</text>
+              </view>
+              <view class="info-row" wx:if="{{item.location}}">
+                <t-icon name="location" size="28rpx" color="#999" />
+                <text>{{item.location}}</text>
+              </view>
+              <view class="info-row">
+                <t-icon name="time" size="28rpx" color="#999" />
+                <text>{{item.createdAtText}}</text>
+              </view>
+            </view>
+          </view>
+          <view class="card-thumb" wx:if="{{item.images && item.images.length > 0}}">
+            <image src="{{item.images[0].url}}" mode="aspectFill" />
+            <view class="image-count" wx:if="{{item.images.length > 1}}">
+              <t-icon name="image" size="24rpx" color="#fff" />
+              <text>{{item.images.length}}</text>
+            </view>
+          </view>
+        </view>
+
+        <view wx:if="{{item.status === 'REJECTED' && item.rejectReason}}" class="reject-reason">
+          <t-icon name="error-circle" size="28rpx" color="#e34d59" />
+          <text>{{item.rejectReason}}</text>
+        </view>
+
+        <view class="card-footer">
+          <view class="footer-left">
+            <view class="stat-item">
+              <t-icon name="browse" size="28rpx" color="#bbb" />
+              <text>{{item.viewCount || 0}}</text>
+            </view>
+            <view class="stat-item">
+              <t-icon name="chat" size="28rpx" color="#bbb" />
+              <text>{{item.commentCount || 0}}</text>
+            </view>
+          </view>
+          <t-icon name="chevron-right" size="36rpx" color="#ccc" />
         </view>
       </view>
 
       <view wx:if="{{loading}}" class="loading-tip">
         <t-loading theme="circular" size="40rpx" />
+        <text>加载中...</text>
       </view>
     </view>
   </view>
