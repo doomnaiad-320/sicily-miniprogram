@@ -51,7 +51,7 @@ Page({
       }, 1000);
     } catch (e) {
       console.error('登录失败', e);
-      wx.showToast({ title: e.data?.message || '登录失败', icon: 'none' });
+      wx.showToast({ title: e.data?.error || e.data?.message || '登录失败', icon: 'none' });
     } finally {
       this.setData({ loading: false });
     }
