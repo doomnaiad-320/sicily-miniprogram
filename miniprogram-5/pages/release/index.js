@@ -50,14 +50,9 @@ Page({
   async handleUploadSuccess(e) {
     const { files } = e.detail;
     this.setData({ originFiles: files });
-
-    // 上传第一张图片并识别
-    if (files.length > 0 && files[0].url && !files[0].uploaded) {
-      await this.uploadAndRecognize(files[0]);
-    }
   },
 
-  async uploadAndRecognize(file) {
+  async uploadImage(file) {
     wx.showLoading({ title: '上传中...' });
     try {
       const uploadRes = await new Promise((resolve, reject) => {
@@ -73,31 +68,13 @@ Page({
         });
       });
 
-      // 更新文件URL
       const files = this.data.originFiles.map((f) =>
         f.url === file.url ? { ...f, url: uploadRes.url, uploaded: true } : f
       );
       this.setData({ originFiles: files });
-
-      // 识别
-      wx.showLoading({ title: '识别中...' });
-      const recognizeRes = await request('/recognize', 'POST', {
-        imageUrl: `${config.baseUrl.replace('/api', '')}${uploadRes.url}`,
-      });
-
-      if (recognizeRes.data) {
-        const { suggestedCategoryName, labels } = recognizeRes.data;
-        // 自动选择分类
-        if (suggestedCategoryName) {
-          const cat = this.data.categories.find((c) =>
-            c.name.includes(suggestedCategoryName) || suggestedCategoryName.includes(c.name)
-          );
-          if (cat) this.setData({ categoryId: cat.id });
-        }
-        if (labels) this.setData({ suggestedTags: labels, tags: labels.slice(0, 3) });
-      }
     } catch (e) {
-      console.error('上传/识别失败', e);
+      console.error('上传失败', e);
+      wx.showToast({ title: '上传失败', icon: 'none' });
     } finally {
       wx.hideLoading();
     }

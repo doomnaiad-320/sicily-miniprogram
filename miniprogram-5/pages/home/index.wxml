@@ -10,40 +10,77 @@
     bind:refresh="onRefresh"
     loadingTexts="{{['下拉刷新', '松手刷新', '正在刷新', '刷新完成']}}"
   >
-    <view class="post-list">
-      <view wx:if="{{posts.length === 0 && !loading}}" class="empty-tip">
+    <view class="waterfall-container">
+      <view wx:if="{{leftColumn.length === 0 && rightColumn.length === 0 && !loading}}" class="empty-tip">
         <t-empty description="暂无数据" />
       </view>
 
-      <view
-        wx:for="{{posts}}"
-        wx:key="id"
-        class="post-card"
-        data-id="{{item.id}}"
-        bindtap="goDetail"
-      >
-        <view class="post-image">
-          <image src="{{item.images[0].url}}" mode="aspectFill" />
-          <view class="post-type {{item.type === 'LOST' ? 'lost' : 'found'}}">
-            {{item.type === 'LOST' ? '失物' : '招领'}}
+      <view class="waterfall-column left-column">
+        <view
+          wx:for="{{leftColumn}}"
+          wx:key="id"
+          class="waterfall-card"
+          data-id="{{item.id}}"
+          bindtap="goDetail"
+        >
+          <view class="card-image">
+            <image src="{{item.images[0].url || '/assets/default-image.png'}}" mode="widthFix" bindload="onImageLoad" data-id="{{item.id}}" />
+            <view class="card-type {{item.type === 'LOST' ? 'lost' : 'found'}}">
+              {{item.type === 'LOST' ? '失物' : '招领'}}
+            </view>
           </view>
-        </view>
-        <view class="post-info">
-          <view class="post-desc">{{item.description}}</view>
-          <view class="post-meta">
-            <text class="post-category">{{item.category.name}}</text>
-            <text class="post-location" wx:if="{{item.locationText}}">📍{{item.locationText}}</text>
-          </view>
-          <view class="post-tags" wx:if="{{item.tags && item.tags.length}}">
-            <text wx:for="{{item.tags}}" wx:key="*this" wx:for-item="tag" class="tag">{{tag}}</text>
+          <view class="card-content">
+            <view class="card-desc">{{item.description}}</view>
+            <view class="card-meta">
+              <text class="card-category">{{item.category.name}}</text>
+            </view>
+            <view class="card-location" wx:if="{{item.locationText}}">
+              <t-icon name="location" size="28rpx" />
+              <text>{{item.locationText}}</text>
+            </view>
+            <view class="card-time">
+              <t-icon name="time" size="24rpx" />
+              <text>{{item.createdAtText}}</text>
+            </view>
           </view>
         </view>
       </view>
 
-      <view wx:if="{{loading}}" class="loading-tip">
-        <t-loading theme="circular" size="40rpx" />
-        <text>加载中...</text>
+      <view class="waterfall-column right-column">
+        <view
+          wx:for="{{rightColumn}}"
+          wx:key="id"
+          class="waterfall-card"
+          data-id="{{item.id}}"
+          bindtap="goDetail"
+        >
+          <view class="card-image">
+            <image src="{{item.images[0].url || '/assets/default-image.png'}}" mode="widthFix" bindload="onImageLoad" data-id="{{item.id}}" />
+            <view class="card-type {{item.type === 'LOST' ? 'lost' : 'found'}}">
+              {{item.type === 'LOST' ? '失物' : '招领'}}
+            </view>
+          </view>
+          <view class="card-content">
+            <view class="card-desc">{{item.description}}</view>
+            <view class="card-meta">
+              <text class="card-category">{{item.category.name}}</text>
+            </view>
+            <view class="card-location" wx:if="{{item.locationText}}">
+              <t-icon name="location" size="28rpx" />
+              <text>{{item.locationText}}</text>
+            </view>
+            <view class="card-time">
+              <t-icon name="time" size="24rpx" />
+              <text>{{item.createdAtText}}</text>
+            </view>
+          </view>
+        </view>
       </view>
+    </view>
+
+    <view wx:if="{{loading}}" class="loading-tip">
+      <t-loading theme="circular" size="40rpx" />
+      <text>加载中...</text>
     </view>
   </t-pull-down-refresh>
 </view>

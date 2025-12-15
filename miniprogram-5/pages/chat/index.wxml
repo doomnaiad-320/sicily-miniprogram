@@ -1,63 +1,154 @@
-<t-navbar title="详情" left-arrow />
+<t-navbar title="详情" left-arrow bind:go-back="goBack" />
 
-<view class="detail-container" wx:if="{{post}}">
-  <!-- 图片轮播 -->
-  <swiper class="image-swiper" indicator-dots autoplay circular>
-    <swiper-item wx:for="{{post.images}}" wx:key="id">
-      <image
-        src="{{item.url}}"
-        mode="aspectFill"
-        data-url="{{item.url}}"
-        bindtap="previewImage"
-      />
-    </swiper-item>
-  </swiper>
+<scroll-view scroll-y class="detail-page" wx:if="{{post}}">
+  <view class="image-section">
+    <swiper 
+      class="image-swiper" 
+      indicator-dots 
+      indicator-color="rgba(255,255,255,0.5)"
+      indicator-active-color="#fff"
+      autoplay 
+      circular
+    >
+      <swiper-item wx:for="{{post.images}}" wx:key="id">
+        <image
+          src="{{item.url}}"
+          mode="aspectFill"
+          data-url="{{item.url}}"
+          bindtap="previewImage"
+        />
+      </swiper-item>
+    </swiper>
+    <view class="image-count">{{currentImageIndex + 1}}/{{post.images.length}}</view>
+  </view>
 
-  <!-- 基本信息 -->
-  <view class="info-card">
-    <view class="type-badge {{post.type === 'LOST' ? 'lost' : 'found'}}">
-      {{post.type === 'LOST' ? '失物' : '招领'}}
+  <view class="content-section">
+    <view class="header-row">
+      <view class="type-tag {{post.type === 'LOST' ? 'lost' : 'found'}}">
+        {{post.type === 'LOST' ? '寻物启事' : '失物招领'}}
+      </view>
+      <view class="time-text">{{post.createdAtText}}</view>
     </view>
-    <view class="desc">{{post.description}}</view>
-    <view class="meta">
-      <text class="category">{{post.category.name}}</text>
-      <text class="location" wx:if="{{post.locationText}}">📍{{post.locationText}}</text>
+
+    <view class="description">{{post.description}}</view>
+
+    <view class="info-grid">
+      <view class="info-item">
+        <view class="info-icon">
+          <t-icon name="view-module" size="40rpx" color="#0052d9" />
+        </view>
+        <view class="info-content">
+          <text class="info-label">物品分类</text>
+          <text class="info-value">{{post.category.name}}</text>
+        </view>
+      </view>
+      
+      <view class="info-item" wx:if="{{post.locationText}}">
+        <view class="info-icon">
+          <t-icon name="location" size="40rpx" color="#0052d9" />
+        </view>
+        <view class="info-content">
+          <text class="info-label">{{post.type === 'LOST' ? '丢失地点' : '拾取地点'}}</text>
+          <text class="info-value">{{post.locationText}}</text>
+        </view>
+      </view>
+
+      <view class="info-item" wx:if="{{post.contactPhone}}">
+        <view class="info-icon">
+          <t-icon name="call" size="40rpx" color="#0052d9" />
+        </view>
+        <view class="info-content">
+          <text class="info-label">联系电话</text>
+          <text class="info-value">{{maskedPhone}}</text>
+        </view>
+      </view>
     </view>
-    <view class="tags" wx:if="{{post.tags && post.tags.length}}">
-      <text wx:for="{{post.tags}}" wx:key="*this" class="tag">{{item}}</text>
-    </view>
-    <view class="contact" wx:if="{{post.contactPhone}}">
-      <text>联系电话：{{post.contactPhone}}</text>
-      <t-button size="extra-small" theme="primary" bindtap="makeCall">拨打</t-button>
+
+    <view class="publisher-section" wx:if="{{post.user}}">
+      <t-avatar image="{{post.user.avatarUrl}}" size="80rpx" />
+      <view class="publisher-info">
+        <text class="publisher-name">{{post.user.nickname}}</text>
+        <text class="publisher-label">发布者</text>
+      </view>
     </view>
   </view>
 
-  <!-- 留言区 -->
   <view class="comment-section">
-    <view class="section-title">留言 ({{comments.length}})</view>
-
-    <view class="comment-input">
-      <input
-        placeholder="写下你的留言..."
-        value="{{commentInput}}"
-        bindinput="onCommentInput"
-      />
-      <t-button size="small" theme="primary" bindtap="submitComment">发送</t-button>
+    <view class="section-header">
+      <text class="section-title">留言板</text>
+      <text class="comment-count">{{comments.length}}条留言</text>
     </view>
 
     <view class="comment-list">
-      <view wx:if="{{comments.length === 0}}" class="empty-comment">暂无留言</view>
+      <view wx:if="{{comments.length === 0}}" class="empty-comment">
+        <t-icon name="chat" size="80rpx" color="#ddd" />
+        <text>暂无留言，快来抢沙发~</text>
+      </view>
       <view wx:for="{{comments}}" wx:key="id" class="comment-item">
-        <t-avatar image="{{item.user.avatarUrl}}" size="small" />
-        <view class="comment-content">
-          <view class="comment-user">{{item.user.nickname}}</view>
-          <view class="comment-text">{{item.content}}</view>
+        <t-avatar image="{{item.user.avatarUrl}}" size="64rpx" />
+        <view class="comment-body">
+          <view class="comment-header">
+            <text class="comment-nickname">{{item.user.nickname}}</text>
+            <text class="comment-time">{{item.createdAtText}}</text>
+          </view>
+          <view class="comment-text" wx:if="{{item.content}}">{{item.content}}</view>
+          <image 
+            wx:if="{{item.imageUrl}}" 
+            class="comment-image" 
+            src="{{item.imageUrl}}" 
+            mode="widthFix"
+            data-url="{{item.imageUrl}}"
+            bindtap="previewCommentImage"
+          />
         </view>
       </view>
     </view>
   </view>
+
+  <view class="bottom-space"></view>
+</scroll-view>
+
+<view class="bottom-bar" wx:if="{{post}}">
+  <view class="comment-image-preview" wx:if="{{commentImage}}">
+    <image src="{{commentImage}}" mode="aspectFill" />
+    <view class="remove-image" bindtap="removeCommentImage">
+      <t-icon name="close" size="32rpx" color="#fff" />
+    </view>
+  </view>
+  <view class="comment-input-row">
+    <t-button 
+      theme="light" 
+      size="small" 
+      icon="image"
+      bindtap="chooseCommentImage"
+    />
+    <view class="comment-input-wrap">
+      <input
+        class="comment-input"
+        placeholder="写下你的留言..."
+        value="{{commentInput}}"
+        bindinput="onCommentInput"
+      />
+    </view>
+    <t-button 
+      theme="primary" 
+      size="small" 
+      bindtap="submitComment"
+    >
+      发送
+    </t-button>
+    <t-button 
+      theme="light"
+      size="small" 
+      wx:if="{{post.contactPhone}}"
+      bindtap="makeCall"
+      icon="call"
+    >
+      联系
+    </t-button>
+  </view>
 </view>
 
 <view wx:if="{{loading}}" class="loading-container">
-  <t-loading theme="circular" size="80rpx" />
+  <t-loading theme="circular" size="80rpx" text="加载中..." />
 </view>
