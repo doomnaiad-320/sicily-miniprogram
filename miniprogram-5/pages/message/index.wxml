@@ -1,25 +1,41 @@
-<wxs src="./index.wxs" module="utils" />
-
-<nav nav-type="title" title-text="全部消息"></nav>
-<scroll-view
-  class="message-list"
-  scroll-y
-  refresher-enabled
-  refresher-triggered="{{ loading }}"
-  bindrefresherrefresh="getMessageList"
->
-  <t-cell
-    wx:for="{{ messageList }}"
-    wx:key="index"
-    t-class-image="avatar"
-    t-class-description="content {{ utils.isRead(item.messages) ? '' : 'unread' }}"
-    image="{{ item.avatar }}"
-    title="{{ item.name }}"
-    description="{{ item.messages[item.messages.length - 1].content }}"
-    hover
-    bind:tap="toChat"
-    data-user-id="{{ item.userId }}"
+<view class="message-page">
+  <scroll-view
+    class="conversation-list"
+    scroll-y
+    refresher-enabled
+    refresher-triggered="{{loading}}"
+    bindrefresherrefresh="loadConversations"
   >
-    <t-badge slot="right-icon" count="{{ utils.computeUnreadNum(item.messages) }}" class="wrapper" />
-  </t-cell>
-</scroll-view>
+    <view wx:if="{{conversations.length === 0 && !loading}}" class="empty-tip">
+      <t-empty description="暂无消息" />
+    </view>
+
+    <view
+      wx:for="{{conversations}}"
+      wx:key="id"
+      class="conversation-item"
+      data-id="{{item.id}}"
+      bindtap="toChat"
+    >
+      <view class="avatar-wrapper">
+        <t-avatar image="{{item.otherUser.avatarUrl}}" size="96rpx" />
+        <view wx:if="{{item.unreadCount > 0}}" class="unread-badge">
+          {{item.unreadCount > 99 ? '99+' : item.unreadCount}}
+        </view>
+      </view>
+
+      <view class="conversation-content">
+        <view class="conversation-header">
+          <text class="user-name">{{item.otherUser.nickname}}</text>
+          <text class="message-time">{{item.lastMessage.timeText}}</text>
+        </view>
+        <view class="last-message {{item.unreadCount > 0 ? 'unread' : ''}}">
+          <text wx:if="{{item.lastMessage.imageUrl}}">[图片]</text>
+          <text wx:else>{{item.lastMessage.content || '暂无消息'}}</text>
+        </view>
+      </view>
+
+      <t-icon name="chevron-right" size="36rpx" color="#ccc" />
+    </view>
+  </scroll-view>
+</view>

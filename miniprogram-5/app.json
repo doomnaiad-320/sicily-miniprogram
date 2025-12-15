@@ -5,6 +5,11 @@
   },
   "subpackages": [
     {
+      "root": "pages/message/chat",
+      "name": "privateChat",
+      "pages": ["index"]
+    },
+    {
       "root": "pages/search",
       "name": "search",
       "pages": ["index"]

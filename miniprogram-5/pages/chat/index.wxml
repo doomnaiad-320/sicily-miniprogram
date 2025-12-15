@@ -73,11 +73,23 @@
     </view>
 
     <view class="publisher-section" wx:if="{{post.user}}">
-      <t-avatar image="{{post.user.avatarUrl}}" size="80rpx" />
-      <view class="publisher-info">
-        <text class="publisher-name">{{post.user.nickname}}</text>
-        <text class="publisher-label">发布者</text>
+      <view class="publisher-left" data-user-id="{{post.user.id}}" bindtap="goToChat">
+        <t-avatar image="{{post.user.avatarUrl}}" size="80rpx" />
+        <view class="publisher-info">
+          <text class="publisher-name">{{post.user.nickname}}</text>
+          <text class="publisher-label">发布者</text>
+        </view>
       </view>
+      <t-button 
+        wx:if="{{!isMyPost}}"
+        theme="primary" 
+        size="small" 
+        icon="chat"
+        data-user-id="{{post.user.id}}"
+        bindtap="goToChat"
+      >
+        私信
+      </t-button>
     </view>
   </view>
 

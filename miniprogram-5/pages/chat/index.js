@@ -11,6 +11,7 @@ Page({
     loading: true,
     currentImageIndex: 0,
     maskedPhone: '',
+    isMyPost: false,
   },
 
   async onLoad(options) {
@@ -37,15 +38,30 @@ Page({
       const comments = (post.comments || []).map(c => ({
         ...c,
         createdAtText: this.formatTime(c.createdAt),
-        imageUrl: getImageUrl(c.imageUrl)
+        imageUrl: getImageUrl(c.imageUrl),
+        user: c.user ? { ...c.user, avatarUrl: getImageUrl(c.user.avatarUrl) } : null
       }));
       
+      if (post.user) {
+        post.user.avatarUrl = getImageUrl(post.user.avatarUrl);
+      }
+      
       const maskedPhone = this.maskPhone(post.contactPhone);
+      
+      const userInfo =
+        wx.getStorageSync('user_info') || wx.getStorageSync('userInfo');
+      const isMyPost =
+        userInfo &&
+        post.user &&
+        userInfo.id !== undefined &&
+        userInfo.id !== null &&
+        String(userInfo.id) === String(post.user.id);
       
       this.setData({
         post,
         comments,
         maskedPhone,
+        isMyPost,
         loading: false,
       });
     } catch (e) {
@@ -199,5 +215,24 @@ Page({
 
   goBack() {
     wx.navigateBack();
+  },
+
+  goToChat(e) {
+    const { userId } = e.currentTarget.dataset;
+    const token = wx.getStorageSync('access_token');
+    if (!token) {
+      wx.showModal({
+        title: '提示',
+        content: '请先登录后再私信',
+        confirmText: '去登录',
+        success: (res) => {
+          if (res.confirm) {
+            wx.navigateTo({ url: '/pages/login/login' });
+          }
+        }
+      });
+      return;
+    }
+    wx.navigateTo({ url: `/pages/message/chat/index?targetUserId=${userId}` });
   },
 });

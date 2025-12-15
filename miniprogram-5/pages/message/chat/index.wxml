@@ -1,0 +1,81 @@
+<view class="chat-page">
+  <scroll-view
+    class="message-list"
+    scroll-y
+    scroll-into-view="{{scrollToView}}"
+    scroll-with-animation
+  >
+    <view wx:if="{{loading}}" class="loading-tip">
+      <t-loading theme="circular" size="40rpx" />
+    </view>
+
+    <view
+      wx:for="{{messages}}"
+      wx:key="id"
+      id="msg-{{item.id}}"
+      class="message-item {{item.isMine ? 'mine' : 'other'}}"
+    >
+      <t-avatar
+        wx:if="{{!item.isMine}}"
+        image="{{item.sender.avatarUrl}}"
+        size="80rpx"
+        class="msg-avatar"
+      />
+
+      <view class="message-main">
+        <text class="message-time">{{item.timeText}}</text>
+        <view class="bubble-content">
+          <image
+            wx:if="{{item.imageUrl}}"
+            src="{{item.imageUrl}}"
+            mode="widthFix"
+            class="message-image"
+            data-url="{{item.imageUrl}}"
+            bindtap="previewImage"
+          />
+          <text wx:elif="{{item.content}}" class="message-text">{{item.content}}</text>
+        </view>
+      </view>
+
+      <t-avatar
+        wx:if="{{item.isMine}}"
+        image="{{item.sender.avatarUrl}}"
+        size="80rpx"
+        class="msg-avatar"
+      />
+    </view>
+
+    <view class="bottom-placeholder"></view>
+  </scroll-view>
+
+  <view class="input-bar">
+    <view class="input-wrapper">
+      <input
+        class="message-input"
+        placeholder="输入消息..."
+        value="{{inputValue}}"
+        bindinput="onInputChange"
+        confirm-type="send"
+        bindconfirm="sendMessage"
+      />
+    </view>
+    <view class="action-buttons">
+      <t-button
+        theme="light"
+        size="small"
+        icon="image"
+        bindtap="chooseImage"
+        class="image-btn"
+      />
+      <t-button
+        theme="primary"
+        size="small"
+        bindtap="sendMessage"
+        disabled="{{!inputValue || sending}}"
+        loading="{{sending}}"
+      >
+        发送
+      </t-button>
+    </view>
+  </view>
+</view>
