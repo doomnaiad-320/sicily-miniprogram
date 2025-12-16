@@ -2,10 +2,14 @@
   "navigationBarTitleText": "我的",
   "usingComponents": {
     "t-avatar": "tdesign-miniprogram/avatar/avatar",
+    "t-button": "tdesign-miniprogram/button/button",
+    "t-dialog": "tdesign-miniprogram/dialog/dialog",
     "t-icon": "tdesign-miniprogram/icon/icon",
+    "t-radio-group": "tdesign-miniprogram/radio-group/radio-group",
     "t-tabs": "tdesign-miniprogram/tabs/tabs",
     "t-tab-panel": "tdesign-miniprogram/tab-panel/tab-panel",
     "t-empty": "tdesign-miniprogram/empty/empty",
-    "t-loading": "tdesign-miniprogram/loading/loading"
+    "t-loading": "tdesign-miniprogram/loading/loading",
+    "t-textarea": "tdesign-miniprogram/textarea/textarea"
   }
 }

@@ -6,6 +6,7 @@ Page({
   data: {
     enable: false,
     activeTab: 'all',
+    bizFilter: 'ALL',
     posts: [],
     leftColumn: [],
     rightColumn: [],
@@ -71,6 +72,10 @@ Page({
 
   processItem(item) {
     item.createdAtText = this.formatTime(item.createdAt);
+    item.bizStatus = item.bizStatus || 'OPEN';
+    item.bizStatusText = item.bizStatus === 'CLOSED'
+      ? (item.type === 'LOST' ? '已找回' : '已认领')
+      : '';
     if (item.images && item.images.length > 0) {
       item.images = item.images.map(img => ({
         ...img,
@@ -144,8 +149,9 @@ Page({
       .join('&');
   },
 
-  onTabChange(e) {
-    const activeTab = e.detail.value;
+  onNavTabTap(e) {
+    const activeTab = e.currentTarget.dataset.value;
+    if (activeTab === this.data.activeTab) return;
     this.setData({ activeTab, page: 1, posts: [], leftColumn: [], rightColumn: [] });
     this.loadPosts();
   },

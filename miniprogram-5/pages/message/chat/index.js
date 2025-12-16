@@ -22,22 +22,43 @@ Page({
     return String(id);
   },
 
-  onLoad(options) {
+  async ensureCurrentUserId() {
+    const cached = this.getCurrentUserId();
+    if (cached != null) return cached;
+
+    const token = wx.getStorageSync('access_token');
+    if (!token) return null;
+
+    try {
+      const res = await request('/auth/me');
+      const user = res.data;
+      if (user && user.id !== undefined && user.id !== null) {
+        wx.setStorageSync('user_info', user);
+        return String(user.id);
+      }
+    } catch (e) {
+      console.error('补全用户信息失败', e);
+    }
+
+    return null;
+  },
+
+  async onLoad(options) {
     const { conversationId, targetUserId } = options;
-    const currentUserId = this.getCurrentUserId();
+    const currentUserId = await this.ensureCurrentUserId();
     this.setData({ currentUserId });
 
     if (conversationId) {
       this.setData({ conversationId: parseInt(conversationId) });
-      this.loadConversation();
-      this.loadMessages();
+      await this.loadConversation();
+      await this.loadMessages();
     } else if (targetUserId) {
-      this.createOrGetConversation(parseInt(targetUserId));
+      await this.createOrGetConversation(parseInt(targetUserId));
     }
   },
 
-  onShow() {
-    const currentUserId = this.getCurrentUserId();
+  async onShow() {
+    const currentUserId = await this.ensureCurrentUserId();
     if (currentUserId !== this.data.currentUserId) {
       this.setData({ currentUserId });
       if (this.data.conversationId) {
@@ -50,8 +71,8 @@ Page({
     try {
       const res = await request('/conversations', 'POST', { targetUserId });
       this.setData({ conversationId: res.data.conversation.id });
-      this.loadConversation();
-      this.loadMessages();
+      await this.loadConversation();
+      await this.loadMessages();
     } catch (e) {
       console.error('创建会话失败', e);
       wx.showToast({ title: '创建会话失败', icon: 'none' });
@@ -80,6 +101,10 @@ Page({
         `/conversations/${this.data.conversationId}/messages`
       );
       const currentUserId = this.data.currentUserId;
+      const otherUserId =
+        this.data.otherUser && this.data.otherUser.id !== undefined && this.data.otherUser.id !== null
+          ? String(this.data.otherUser.id)
+          : null;
       const messages = (res.data.messages || []).map((msg) => ({
         ...msg,
         sender: {
@@ -88,7 +113,12 @@ Page({
         },
         imageUrl: getImageUrl(msg.imageUrl),
         timeText: this.formatTime(msg.createdAt),
-        isMine: currentUserId != null && String(msg.senderId) === currentUserId,
+        isMine:
+          currentUserId != null
+            ? String(msg.senderId) === currentUserId
+            : otherUserId != null
+              ? String(msg.senderId) !== otherUserId
+              : false,
       }));
       this.setData({ messages, loading: false });
       this.scrollToBottom();

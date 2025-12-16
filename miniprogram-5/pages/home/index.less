@@ -6,6 +6,30 @@
   padding-bottom: 160rpx;
 }
 
+.nav-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 20rpx 32rpx;
+  background: #fff;
+}
+
+.nav-tab {
+  padding: 16rpx 48rpx;
+  font-size: 28rpx;
+  color: #666;
+  border-radius: 999rpx;
+  background: #f5f5f5;
+  transition: all 0.2s;
+}
+
+.nav-tab.active {
+  color: #fff;
+  background: linear-gradient(135deg, #0052d9, #0066ff);
+  font-weight: 500;
+}
+
 .waterfall-container {
   display: flex;
   padding: 16rpx;
@@ -32,6 +56,10 @@
   margin-bottom: 16rpx;
   overflow: hidden;
   box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.06);
+}
+
+.waterfall-card.closed {
+  opacity: 0.76;
 }
 
 .card-image {
@@ -61,6 +89,18 @@
 
   .card-type.found {
     background: linear-gradient(135deg, #51cf66, #40c057);
+  }
+
+  .card-biz-status {
+    position: absolute;
+    top: 12rpx;
+    right: 12rpx;
+    padding: 6rpx 14rpx;
+    border-radius: 8rpx;
+    font-size: 22rpx;
+    color: #fff;
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.55);
   }
 }
 
@@ -137,9 +177,23 @@
   margin-left: 12rpx;
 }
 
-.home-release {
+.fab-button {
   position: fixed;
   bottom: 180rpx;
-  right: 32rpx;
+  right: 40rpx;
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #0052d9, #0066ff);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8rpx 32rpx rgba(0, 82, 217, 0.4);
   z-index: 100;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:active {
+    transform: scale(0.92);
+    box-shadow: 0 4rpx 16rpx rgba(0, 82, 217, 0.3);
+  }
 }

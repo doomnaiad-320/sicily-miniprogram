@@ -1,9 +1,27 @@
 <view class="home-container">
-  <t-tabs defaultValue="all" bind:change="onTabChange">
-    <t-tab-panel label="全部" value="all" />
-    <t-tab-panel label="失物" value="LOST" />
-    <t-tab-panel label="招领" value="FOUND" />
-  </t-tabs>
+  <view class="nav-tabs">
+    <view 
+      class="nav-tab {{activeTab === 'all' ? 'active' : ''}}" 
+      data-value="all" 
+      bindtap="onNavTabTap"
+    >
+      全部
+    </view>
+    <view 
+      class="nav-tab {{activeTab === 'LOST' ? 'active' : ''}}" 
+      data-value="LOST" 
+      bindtap="onNavTabTap"
+    >
+      失物
+    </view>
+    <view 
+      class="nav-tab {{activeTab === 'FOUND' ? 'active' : ''}}" 
+      data-value="FOUND" 
+      bindtap="onNavTabTap"
+    >
+      招领
+    </view>
+  </view>
 
   <t-pull-down-refresh
     value="{{enable}}"
@@ -19,7 +37,7 @@
         <view
           wx:for="{{leftColumn}}"
           wx:key="id"
-          class="waterfall-card"
+          class="waterfall-card {{item.bizStatus === 'CLOSED' ? 'closed' : ''}}"
           data-id="{{item.id}}"
           bindtap="goDetail"
         >
@@ -27,6 +45,9 @@
             <image src="{{item.images[0].url || '/assets/default-image.png'}}" mode="widthFix" bindload="onImageLoad" data-id="{{item.id}}" />
             <view class="card-type {{item.type === 'LOST' ? 'lost' : 'found'}}">
               {{item.type === 'LOST' ? '失物' : '招领'}}
+            </view>
+            <view wx:if="{{item.bizStatus === 'CLOSED'}}" class="card-biz-status">
+              {{item.bizStatusText}}
             </view>
           </view>
           <view class="card-content">
@@ -50,7 +71,7 @@
         <view
           wx:for="{{rightColumn}}"
           wx:key="id"
-          class="waterfall-card"
+          class="waterfall-card {{item.bizStatus === 'CLOSED' ? 'closed' : ''}}"
           data-id="{{item.id}}"
           bindtap="goDetail"
         >
@@ -58,6 +79,9 @@
             <image src="{{item.images[0].url || '/assets/default-image.png'}}" mode="widthFix" bindload="onImageLoad" data-id="{{item.id}}" />
             <view class="card-type {{item.type === 'LOST' ? 'lost' : 'found'}}">
               {{item.type === 'LOST' ? '失物' : '招领'}}
+            </view>
+            <view wx:if="{{item.bizStatus === 'CLOSED'}}" class="card-biz-status">
+              {{item.bizStatusText}}
             </view>
           </view>
           <view class="card-content">
@@ -85,9 +109,7 @@
   </t-pull-down-refresh>
 </view>
 
-<view class="home-release">
-  <t-button theme="primary" size="large" icon="add" shape="round" bindtap="goRelease">
-    发布
-  </t-button>
+<view class="fab-button" bindtap="goRelease">
+  <t-icon name="add" size="48rpx" color="#fff" />
 </view>
 <t-message id="t-message" />

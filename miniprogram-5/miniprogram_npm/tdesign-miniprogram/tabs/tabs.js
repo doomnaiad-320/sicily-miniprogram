@@ -86,9 +86,12 @@ let Tabs = class Tabs extends SuperComponent {
                 wx.nextTick(() => {
                     this.setTrack();
                 });
-                getRect(this, `.${name}`).then((rect) => {
-                    this.containerWidth = rect.width;
-                });
+                getRect(this, `.${name}`)
+                    .then((rect) => {
+                    if (rect)
+                        this.containerWidth = rect.width;
+                })
+                    .catch(() => { });
                 this.setData({
                     tabID: getUniqueID(),
                 });

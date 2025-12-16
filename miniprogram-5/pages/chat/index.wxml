@@ -27,10 +27,34 @@
       <view class="type-tag {{post.type === 'LOST' ? 'lost' : 'found'}}">
         {{post.type === 'LOST' ? '寻物启事' : '失物招领'}}
       </view>
-      <view class="time-text">{{post.createdAtText}}</view>
+      <view class="header-right">
+        <view wx:if="{{post.bizStatus === 'CLOSED'}}" class="biz-status-tag">
+          {{post.bizStatusText}}
+        </view>
+        <view class="time-text">{{post.createdAtText}}</view>
+      </view>
     </view>
 
     <view class="description">{{post.description}}</view>
+
+    <view wx:if="{{post.bizStatus === 'CLOSED'}}" class="closed-info">
+      <view class="closed-info-row">
+        <text class="closed-label">结束原因</text>
+        <text class="closed-value">{{post.closedReasonText || '—'}}</text>
+      </view>
+      <view class="closed-info-row">
+        <text class="closed-label">结束时间</text>
+        <text class="closed-value">{{post.closedAtText || '—'}}</text>
+      </view>
+      <view wx:if="{{post.closedRemark}}" class="closed-info-row">
+        <text class="closed-label">备注</text>
+        <text class="closed-value">{{post.closedRemark}}</text>
+      </view>
+      <view wx:if="{{!allowClosedActions}}" class="closed-actions-tip">
+        <text>默认不支持联系/留言</text>
+        <t-button theme="primary" size="small" bindtap="confirmEnableClosedActions">仍要继续</t-button>
+      </view>
+    </view>
 
     <view class="info-grid">
       <view class="info-item">
@@ -62,10 +86,11 @@
           <text class="info-value">{{maskedPhone}}</text>
         </view>
         <t-button 
-          theme="primary"
+          theme="{{post.bizStatus === 'CLOSED' && !allowClosedActions ? 'light' : 'primary'}}"
           size="small" 
           bindtap="makeCall"
           icon="call"
+          disabled="{{post.bizStatus === 'CLOSED' && !allowClosedActions}}"
         >
           联系
         </t-button>
@@ -73,7 +98,7 @@
     </view>
 
     <view class="publisher-section" wx:if="{{post.user}}">
-      <view class="publisher-left" data-user-id="{{post.user.id}}" bindtap="goToChat">
+      <view class="publisher-left {{post.bizStatus === 'CLOSED' && !allowClosedActions ? 'disabled' : ''}}" data-user-id="{{post.user.id}}" bindtap="goToChat">
         <t-avatar image="{{post.user.avatarUrl}}" size="80rpx" />
         <view class="publisher-info">
           <text class="publisher-name">{{post.user.nickname}}</text>
@@ -82,11 +107,12 @@
       </view>
       <t-button 
         wx:if="{{!isMyPost}}"
-        theme="primary" 
+        theme="{{post.bizStatus === 'CLOSED' && !allowClosedActions ? 'light' : 'primary'}}" 
         size="small" 
         icon="chat"
         data-user-id="{{post.user.id}}"
         bindtap="goToChat"
+        disabled="{{post.bizStatus === 'CLOSED' && !allowClosedActions}}"
       >
         私信
       </t-button>
@@ -141,6 +167,7 @@
       size="small" 
       icon="image"
       bindtap="chooseCommentImage"
+      disabled="{{post.bizStatus === 'CLOSED' && !allowClosedActions}}"
     />
     <view class="comment-input-wrap">
       <input
@@ -148,12 +175,14 @@
         placeholder="写下你的留言..."
         value="{{commentInput}}"
         bindinput="onCommentInput"
+        disabled="{{post.bizStatus === 'CLOSED' && !allowClosedActions}}"
       />
     </view>
     <t-button 
       theme="primary" 
       size="small" 
       bindtap="submitComment"
+      disabled="{{(post.bizStatus === 'CLOSED' && !allowClosedActions) || (!commentInput && !commentImage)}}"
     >
       发送
     </t-button>

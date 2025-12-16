@@ -1,105 +1,223 @@
 <view class="my-page">
   <!-- 用户信息 -->
-  <view class="user-card">
+  <view class="user-header">
     <view wx:if="{{isLoggedIn && userInfo}}" class="user-info">
-      <t-avatar image="{{userInfo.avatarUrl}}" size="large" />
-      <view class="user-detail">
+      <t-avatar image="{{userInfo.avatarUrl}}" size="120rpx" class="user-avatar" />
+      <view class="user-meta">
         <view class="nickname">{{userInfo.nickname}}</view>
+        <view class="user-stats">
+          <view class="stat-item">
+            <text class="stat-num">{{myPosts.length}}</text>
+            <text class="stat-label">发布</text>
+          </view>
+        </view>
       </view>
-      <t-icon name="setting" size="48rpx" bindtap="goSetting" />
+      <view class="setting-btn" bindtap="goSetting">
+        <t-icon name="setting" size="44rpx" color="rgba(255,255,255,0.9)" />
+      </view>
     </view>
-    <view wx:else class="login-tip" bindtap="goLogin">
-      <t-avatar icon="user" size="large" />
+    <view wx:else class="login-area" bindtap="goLogin">
+      <t-avatar icon="user" size="120rpx" class="user-avatar" />
       <view class="login-text">点击登录</view>
     </view>
   </view>
 
   <!-- 我的发布 -->
-  <view class="my-posts" wx:if="{{isLoggedIn}}">
-    <view class="section-header">
-      <text class="section-title">我的发布</text>
-      <text class="section-count">共 {{myPosts.length}} 条</text>
+  <view class="content-area" wx:if="{{isLoggedIn}}">
+    <view class="filter-bar">
+      <view 
+        class="filter-item {{activeTab === 'all' ? 'active' : ''}}"
+        data-value="all"
+        bindtap="onTabChange"
+      >全部</view>
+      <view 
+        class="filter-item {{activeTab === 'PENDING' ? 'active' : ''}}"
+        data-value="PENDING"
+        bindtap="onTabChange"
+      >审核中</view>
+      <view 
+        class="filter-item {{activeTab === 'APPROVED' ? 'active' : ''}}"
+        data-value="APPROVED"
+        bindtap="onTabChange"
+      >已通过</view>
+      <view 
+        class="filter-item {{activeTab === 'REJECTED' ? 'active' : ''}}"
+        data-value="REJECTED"
+        bindtap="onTabChange"
+      >已拒绝</view>
     </view>
 
-    <t-tabs defaultValue="all" bind:change="onTabChange" class="post-tabs">
-      <t-tab-panel label="全部" value="all" />
-      <t-tab-panel label="审核中" value="PENDING" />
-      <t-tab-panel label="已通过" value="APPROVED" />
-      <t-tab-panel label="已拒绝" value="REJECTED" />
-    </t-tabs>
-
     <view class="post-list">
-      <view wx:if="{{myPosts.length === 0 && !loading}}" class="empty-tip">
+      <view wx:if="{{myPosts.length === 0 && !loading}}" class="empty-state">
         <t-empty description="暂无发布记录" />
       </view>
 
       <view
         wx:for="{{myPosts}}"
         wx:key="id"
-        class="post-card"
+        class="post-item"
         data-id="{{item.id}}"
         bindtap="goDetail"
       >
-        <view class="card-header">
-          <view class="type-badge {{item.type === 'LOST' ? 'lost' : 'found'}}">
-            {{item.type === 'LOST' ? '寻物启事' : '失物招领'}}
+        <!-- 图片轮播区域 -->
+        <view class="item-image" wx:if="{{item.images && item.images.length > 0}}">
+          <swiper 
+            class="image-swiper"
+            indicator-dots="{{item.images.length > 1}}"
+            indicator-color="rgba(255,255,255,0.4)"
+            indicator-active-color="#fff"
+            circular
+            catchtap=""
+          >
+            <swiper-item wx:for="{{item.images}}" wx:for-item="img" wx:key="url">
+              <image src="{{img.url}}" mode="aspectFill" />
+            </swiper-item>
+          </swiper>
+          <view class="type-tag {{item.type === 'LOST' ? 'lost' : 'found'}}">
+            {{item.type === 'LOST' ? '失物' : '招领'}}
           </view>
-          <view class="status-badge status-{{item.status}}">
-            {{item.status === 'PENDING' ? '审核中' : item.status === 'APPROVED' ? '已通过' : item.status === 'REJECTED' ? '已拒绝' : '已下架'}}
-          </view>
-        </view>
-
-        <view class="card-body">
-          <view class="card-main">
-            <view class="card-desc">{{item.description}}</view>
-            <view class="card-info">
-              <view class="info-row" wx:if="{{item.category}}">
-                <t-icon name="view-module" size="28rpx" color="#999" />
-                <text>{{item.category.name}}</text>
-              </view>
-              <view class="info-row" wx:if="{{item.location}}">
-                <t-icon name="location" size="28rpx" color="#999" />
-                <text>{{item.location}}</text>
-              </view>
-              <view class="info-row">
-                <t-icon name="time" size="28rpx" color="#999" />
-                <text>{{item.createdAtText}}</text>
-              </view>
-            </view>
-          </view>
-          <view class="card-thumb" wx:if="{{item.images && item.images.length > 0}}">
-            <image src="{{item.images[0].url}}" mode="aspectFill" />
-            <view class="image-count" wx:if="{{item.images.length > 1}}">
-              <t-icon name="image" size="24rpx" color="#fff" />
-              <text>{{item.images.length}}</text>
-            </view>
+          <view wx:if="{{item.images.length > 1}}" class="img-count">
+            <text>{{item.images.length}}张</text>
           </view>
         </view>
 
-        <view wx:if="{{item.status === 'REJECTED' && item.rejectReason}}" class="reject-reason">
-          <t-icon name="error-circle" size="28rpx" color="#e34d59" />
-          <text>{{item.rejectReason}}</text>
+        <!-- 无图时的类型标签 -->
+        <view wx:else class="no-image-type">
+          <view class="type-tag {{item.type === 'LOST' ? 'lost' : 'found'}}">
+            {{item.type === 'LOST' ? '失物' : '招领'}}
+          </view>
         </view>
 
-        <view class="card-footer">
-          <view class="footer-left">
-            <view class="stat-item">
-              <t-icon name="browse" size="28rpx" color="#bbb" />
-              <text>{{item.viewCount || 0}}</text>
+        <!-- 内容区域 -->
+        <view class="item-content">
+          <view class="item-desc">{{item.description}}</view>
+          
+          <view class="item-meta">
+            <view class="meta-row" wx:if="{{item.category}}">
+              <t-icon name="view-module" size="26rpx" color="#0052d9" />
+              <text class="meta-text primary">{{item.category.name}}</text>
             </view>
-            <view class="stat-item">
-              <t-icon name="chat" size="28rpx" color="#bbb" />
-              <text>{{item.commentCount || 0}}</text>
+            <view class="meta-row" wx:if="{{item.location}}">
+              <t-icon name="location" size="26rpx" color="#999" />
+              <text class="meta-text">{{item.location}}</text>
+            </view>
+            <view class="meta-row">
+              <t-icon name="time" size="26rpx" color="#bbb" />
+              <text class="meta-text light">{{item.createdAtText}}</text>
             </view>
           </view>
-          <t-icon name="chevron-right" size="36rpx" color="#ccc" />
+
+          <!-- 状态和操作 -->
+          <view class="item-footer">
+            <view class="status-group">
+              <!-- 状态互斥：审核中/已拒绝/已下架/进行中/已找回 -->
+              <view wx:if="{{item.status === 'PENDING'}}" class="status-chip status-PENDING">审核中</view>
+              <view wx:elif="{{item.status === 'REJECTED'}}" class="status-chip status-REJECTED">已拒绝</view>
+              <view wx:elif="{{item.status === 'OFFLINE'}}" class="status-chip status-OFFLINE">已下架</view>
+              <view wx:elif="{{item.bizStatus === 'CLOSED'}}" class="status-chip biz-CLOSED">{{item.bizStatusText}}</view>
+              <view wx:else class="status-chip biz-OPEN">进行中</view>
+            </view>
+
+            <view class="action-area">
+              <view class="stat-group">
+                <view class="mini-stat">
+                  <t-icon name="browse" size="26rpx" color="#ccc" />
+                  <text>{{item.viewCount || 0}}</text>
+                </view>
+                <view class="mini-stat">
+                  <t-icon name="chat" size="26rpx" color="#ccc" />
+                  <text>{{item.commentCount || 0}}</text>
+                </view>
+              </view>
+              <view
+                wx:if="{{item.status === 'APPROVED' && item.bizStatus !== 'CLOSED'}}"
+                class="action-btn"
+                data-id="{{item.id}}"
+                catchtap="openCloseDialog"
+              >
+                {{item.type === 'LOST' ? '已找回' : '已认领'}}
+              </view>
+              <view
+                wx:elif="{{item.status === 'APPROVED' && item.bizStatus === 'CLOSED'}}"
+                class="action-btn secondary"
+                data-id="{{item.id}}"
+                catchtap="openReopenDialog"
+              >
+                继续
+              </view>
+            </view>
+          </view>
+
+          <!-- 拒绝原因 -->
+          <view wx:if="{{item.status === 'REJECTED' && item.rejectReason}}" class="reject-info">
+            <t-icon name="error-circle" size="26rpx" color="#e34d59" />
+            <text>{{item.rejectReason}}</text>
+          </view>
         </view>
       </view>
 
-      <view wx:if="{{loading}}" class="loading-tip">
+      <view wx:if="{{loading}}" class="loading-state">
         <t-loading theme="circular" size="40rpx" />
         <text>加载中...</text>
       </view>
     </view>
   </view>
 </view>
+
+<t-dialog
+  visible="{{closeDialogVisible}}"
+  title="{{actionPostType === 'FOUND' ? '标记已认领' : '标记已找回'}}"
+  confirm-btn="确认"
+  cancel-btn="取消"
+  bind:confirm="confirmClosePost"
+  bind:close="closeCloseDialog"
+>
+  <view slot="content" class="dialog-content">
+    <view class="dialog-field">
+      <view class="field-label">结束原因</view>
+      <t-radio-group
+        options="{{closeReasonOptions}}"
+        value="{{closeReason}}"
+        bind:change="onCloseReasonChange"
+      />
+    </view>
+    <view class="dialog-field">
+      <view class="field-label">备注（公开展示，可选）</view>
+      <t-textarea
+        value="{{closeRemark}}"
+        placeholder="可补充说明，例如：已当面交接"
+        maxlength="200"
+        bind:change="onCloseRemarkChange"
+      />
+    </view>
+  </view>
+</t-dialog>
+
+<t-dialog
+  visible="{{reopenDialogVisible}}"
+  title="仍然继续"
+  confirm-btn="确认"
+  cancel-btn="取消"
+  bind:confirm="confirmReopenPost"
+  bind:close="closeReopenDialog"
+>
+  <view slot="content" class="dialog-content">
+    <view class="dialog-field">
+      <view class="field-label">重新开启原因</view>
+      <t-radio-group
+        options="{{reopenReasonOptions}}"
+        value="{{reopenReason}}"
+        bind:change="onReopenReasonChange"
+      />
+    </view>
+    <view class="dialog-field">
+      <view class="field-label">备注（公开展示，可选）</view>
+      <t-textarea
+        value="{{reopenRemark}}"
+        placeholder="可补充说明，例如：还有线索需要继续寻找"
+        maxlength="200"
+        bind:change="onReopenRemarkChange"
+      />
+    </view>
+  </view>
+</t-dialog>
