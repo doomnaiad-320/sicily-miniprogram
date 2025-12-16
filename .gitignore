@@ -4,3 +4,4 @@ dist
 *.log
 server/api/dev.db
 .DS_Store
+.cladue/
