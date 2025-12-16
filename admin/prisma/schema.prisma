@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  openId      String   @unique
+  nickname    String
+  avatarUrl   String
+  status      String   @default("ACTIVE")
+  createdAt   DateTime @default(now())
+  lastLoginAt DateTime?
+
+  posts         Post[]
+  comments      Comment[]
+  conversations1 Conversation[] @relation("ConversationUser1")
+  conversations2 Conversation[] @relation("ConversationUser2")
+  messages      Message[]
+}
+
+model Admin {
+  id          Int      @id @default(autoincrement())
+  username    String   @unique
+  password    String
+  createdAt   DateTime @default(now())
+  lastLoginAt DateTime?
+
+  audits AuditRecord[]
+  posts  Post[]
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String
+  sort      Int      @default(0)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  posts Post[]
+
+  @@unique([name])
+}
+
+model Post {
+  id             Int      @id @default(autoincrement())
+  type           String
+  title          String?
+  description    String
+  categoryId     Int
+  locationLat    Float?
+  locationLng    Float?
+  locationText   String?
+  contactPhone   String?
+  status         String   @default("PENDING")
+  bizStatus      String   @default("OPEN")
+  closedAt       DateTime?
+  closedReason   String?
+  closedRemark   String?
+  closedByUserId Int?
+  closedByAdminId Int?
+  reopenedAt     DateTime?
+  reopenReason   String?
+  reopenRemark   String?
+  reopenedByUserId Int?
+  reopenedByAdminId Int?
+  rejectReason   String?
+  tagsJson       String?
+  createdByUser  Int?
+  createdByAdmin Int?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  category Category      @relation(fields: [categoryId], references: [id])
+  user     User?         @relation(fields: [createdByUser], references: [id])
+  admin    Admin?        @relation(fields: [createdByAdmin], references: [id])
+  images   PostImage[]
+  comments Comment[]
+  audits   AuditRecord[]
+
+  @@index([categoryId])
+  @@index([status, type, bizStatus])
+  @@index([createdByUser])
+  @@index([bizStatus])
+}
+
+model PostImage {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  url       String
+  sort      Int      @default(0)
+  createdAt DateTime @default(now())
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@index([postId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    Int
+  content   String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  isDeleted Boolean  @default(false)
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([postId])
+}
+
+model AuditRecord {
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  adminId   Int
+  action    String
+  reason    String?
+  createdAt DateTime @default(now())
+
+  post  Post  @relation(fields: [postId], references: [id], onDelete: Cascade)
+  admin Admin @relation(fields: [adminId], references: [id])
+
+  @@index([postId])
+}
+
+model Conversation {
+  id        Int      @id @default(autoincrement())
+  userId1   Int
+  userId2   Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user1    User      @relation("ConversationUser1", fields: [userId1], references: [id])
+  user2    User      @relation("ConversationUser2", fields: [userId2], references: [id])
+  messages Message[]
+
+  @@unique([userId1, userId2])
+  @@index([userId1])
+  @@index([userId2])
+}
+
+model Message {
+  id             Int      @id @default(autoincrement())
+  conversationId Int
+  senderId       Int
+  content        String
+  imageUrl       String?
+  isRead         Boolean  @default(false)
+  createdAt      DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id])
+
+  @@index([conversationId])
+  @@index([senderId])
+}
